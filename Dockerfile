@@ -1,7 +1,9 @@
 FROM golang:1.10-stretch
 # Install software
-RUN apt-get update
-RUN apt-get install -y bind9 python3 python3-pip
+RUN apt-get update \
+ && apt-get install -y bind9 python3 python3-pip \
+ && apt-get clean all \
+ && rm -rf /var/lib/apt/lists/*;
 ADD requirements.txt /root/
 RUN pip3 install -r /root/requirements.txt
 # Setup bind9
