@@ -2,7 +2,7 @@
 
 A container for integration testing ACME protocol modules.
 
-Uses [Pebble](https://github.com/letsencrypt/Pebble) and [BIND 9](https://www.isc.org/downloads/bind/).
+Uses [Pebble](https://github.com/letsencrypt/Pebble).
 
 ## Usage
 

@@ -22,8 +22,9 @@ import base64
 import codecs
 import logging
 import os
-import subprocess
 import sys
+
+from functools import partial
 
 from flask import Flask
 from flask import request
@@ -31,18 +32,16 @@ from flask import request
 from acme_tlsalpn import ALPNChallengeServer, gen_ss_cert
 from OpenSSL import crypto
 
+from dns_server import DNSServer
+
 
 app = Flask(__name__)
 app.config['LOGGER_HANDLER_POLICY'] = 'always'
 
-ZONES_PATH = os.path.abspath(os.environ.get('ZONES_PATH', '.'))
-
 PEBBLE_PATH = os.path.join(os.path.abspath(os.environ.get('GOPATH', '.')), 'src', 'github.com', 'letsencrypt', 'pebble')
 
 
-zones = set(['example.com', 'example.org'])
 challenges = {}
-txt_records = {}
 
 
 def log(message, data=None, program='Controller'):
@@ -83,45 +82,6 @@ def setup_loggers():
 setup_loggers()
 
 
-def execute(what, command):
-    try:
-        p = subprocess.Popen(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        (so, se) = p.communicate()
-        data = []
-        if so:
-            data.append('*** STDOUT:')
-            data.extend(so.decode('utf8').split('\n'))
-        if se:
-            data.append('*** STDERR:')
-            data.extend(se.decode('utf8').split('\n'))
-        log(what, data)
-    except Exception as e:
-        log('FAILED: {0}'.format(what), e)
-
-
-def update_zone(zone, restart=True):
-    result = R"""$TTL    1
-@       IN      SOA     {0}. localhost. (1 1 1 1 1)
-@       IN      NS      localhost.
-@       IN      A       127.0.0.1
-@       IN      AAAA    ::1
-*       IN      A       127.0.0.1
-*       IN      AAAA    ::1
-""".format(zone)
-    for record, values in txt_records.get(zone, {}).items():
-        for value in values:
-            result += '{0} IN TXT {1}\n'.format(record if record else '@', value)
-    log('Updating zone {0}'.format(zone), result.split('\n'))
-    with open(os.path.join(ZONES_PATH, zone), "wb") as f:
-        f.write(result.encode('utf-8'))
-    if restart:
-        execute('Restarting BIND', ['service', 'bind9', 'restart'])
-
-
 @app.route('/')
 def m_index():
     return 'ACME test environment controller'
@@ -144,32 +104,18 @@ def http_challenge(host, filename):
         return 'ok'
 
 
+dns_server = DNSServer(port=53, log_callback=partial(log, program='DNS Server'))
+
+
 @app.route('/dns/<string:record>', methods=['PUT', 'DELETE'])
 def dns_challenge(record):
-    i = record.rfind('.')
-    j = record.rfind('.', 0, i - 1)
-    if i >= 0 and j >= 0:
-        zone = record[j + 1:]
-        record = record[:j]
-    elif i >= 0:
-        zone = record
-        record = ''
-    else:
-        return 'cannot parse record', 400
-    if zone not in zones:
-        return 'unknown zone "{0}"; must be one of {1}'.format(zone, ', '.join(zones)), 404
     if request.method == 'PUT':
-        if zone not in txt_records:
-            txt_records[zone] = {}
         values = request.get_json(force=True)
-        log('Adding TXT records for zone {0}, record {1}'.format(zone, record), values)
-        txt_records[zone][record] = values
+        log('Adding TXT records for {0}'.format(record), values)
+        dns_server.set_txt_records(record, values)
     else:
-        if zone not in txt_records or record not in txt_records[zone]:
-            return 'not found', 404
-        log('Removing TXT records for zone {0}, record {1}'.format(zone, record))
-        del txt_records[zone][record]
-    update_zone(zone)
+        log('Removing TXT records for {0}'.format(record))
+        dns_server.clear_txt_records(record)
     return 'ok'
 
 
@@ -219,12 +165,5 @@ def get_root_certificate():
         return f.read()
 
 
-def setup_zones():
-    for zone in zones:
-        update_zone(zone, restart=False)
-    execute('Starting BIND', ['service', 'bind9', 'start'])
-
-
 if __name__ == "__main__":
-    setup_zones()
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('CONTROLLER_PORT', 5000)))
