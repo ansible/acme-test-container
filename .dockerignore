@@ -4,6 +4,7 @@
 !requirements.txt
 !run.sh
 !controller.py
+!dns_server.py
 !acme_tlsalpn.py
 !README.md
 !LICENSE

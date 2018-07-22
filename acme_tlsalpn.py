@@ -212,6 +212,7 @@ class ALPNChallengeServer(object):
             self.log_callback('Launching TLS ALPN challenge server...')
             self.server = TLSALPN01Server(("", self.port), certs=self.certs, challenge_certs=self.challenge_certs, log_callback=self.log_callback)
             self.thread = threading.Thread(target=self.server.serve_forever)
+            self.thread.daemon = True
             self.thread.start()
 
 
