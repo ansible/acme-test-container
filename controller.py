@@ -23,6 +23,8 @@ import codecs
 import logging
 import os
 import sys
+import urllib
+import ssl
 
 from functools import partial
 
@@ -159,10 +161,18 @@ def get_http_challenge(filename):
     return challenges[host][filename]
 
 
-@app.route('/root-certificate')
-def get_root_certificate():
+@app.route('/root-certificate-for-acme-endpoint')
+def get_root_certificate_minica():
     with open(os.path.join(PEBBLE_PATH, 'test', 'certs', 'pebble.minica.pem'), 'rt') as f:
         return f.read()
+
+
+@app.route('/root-certificate-for-ca')
+def get_root_certificate_pebble():
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return urllib.request.urlopen("https://localhost:14000/root", context=ctx).read()
 
 
 if __name__ == "__main__":
