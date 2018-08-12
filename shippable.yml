@@ -1,0 +1,8 @@
+language: python
+
+runtime:
+  nodePool: test_node_pool
+
+build:
+  ci:
+    - docker build .
