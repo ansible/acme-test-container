@@ -22,7 +22,10 @@ import base64
 import codecs
 import logging
 import os
+import re
+import ssl
 import sys
+import urllib
 
 from functools import partial
 
@@ -122,23 +125,62 @@ def dns_challenge(record):
 tls_alpn_server = ALPNChallengeServer(port=5001, log_callback=log)
 
 
-@app.route('/tls-alpn/<string:domain>', methods=['PUT', 'DELETE'])
-def tls_alpn_challenge(domain):
-    if request.method == 'PUT':
-        log('Adding TLS ALPN challenge for domain {0}'.format(domain))
-        der_value = b"DER:0420" + codecs.encode(base64.standard_b64decode(request.data), 'hex')
-        # Create private key
-        key = crypto.PKey()
-        key.generate_key(crypto.TYPE_RSA, 2048)
-        # Create self-signed certificates
-        acme_extension = crypto.X509Extension(b"1.3.6.1.5.5.7.1.30.1", critical=True, value=der_value)
-        cert_normal = gen_ss_cert(key, [domain], [])
-        cert_challenge = gen_ss_cert(key, [domain], extensions=[acme_extension])
-        # Start/modify TLS-ALPN-01 challenge server
-        tls_alpn_server.add(domain, key, cert_normal, cert_challenge)
-    else:
-        log('Removing TLS ALPN challenge for domain {0}'.format(domain))
-        tls_alpn_server.remove(domain)
+def _get_alpn_key_cert_from_der_value(domain, data):
+    der_value = b"DER:0420" + codecs.encode(base64.standard_b64decode(data), 'hex')
+    # Create private key
+    key = crypto.PKey()
+    key.generate_key(crypto.TYPE_RSA, 2048)
+    # Create self-signed certificates
+    acme_extension = crypto.X509Extension(b"1.3.6.1.5.5.7.1.30.1", critical=True, value=der_value)
+    cert_challenge = gen_ss_cert(key, [domain], extensions=[acme_extension])
+    return key, cert_challenge
+
+
+def _find_line_regex(lines, regex):
+    pattern = re.compile(regex)
+    for i, line in enumerate(lines):
+        if re.fullmatch(pattern, line):
+            return i
+    raise Exception('Cannot find line in input which matches "{0}"!'.format(regex))
+
+
+def _get_alpn_key_cert_from_pem_chain(domain, data):
+    data = data.split(b'\n')
+    # Extract challenge certificate
+    cert_lines = data[_find_line_regex(data, b'-----BEGIN .*CERTIFICATE-----'):_find_line_regex(data, b'-----END .*CERTIFICATE-----') + 1]
+    cert_challenge = crypto.load_certificate(crypto.FILETYPE_PEM, b'\n'.join(cert_lines))
+    # Extract challenge private key
+    key_lines = data[_find_line_regex(data, b'-----BEGIN .*PRIVATE KEY-----'):_find_line_regex(data, b'-----END .*PRIVATE KEY-----') + 1]
+    key = crypto.load_privatekey(crypto.FILETYPE_PEM, b'\n'.join(key_lines))
+    return key, cert_challenge
+
+
+@app.route('/tls-alpn/<string:domain>/der-value-b64', methods=['PUT'])
+def tls_alpn_challenge_put_b64(domain):
+    log('Adding TLS ALPN challenge for domain {0} (Base64 encoded DER value)'.format(domain))
+    key, cert_challenge = _get_alpn_key_cert_from_der_value(domain, request.data)
+    cert_normal = gen_ss_cert(key, [domain], [])
+    # Start/modify TLS-ALPN-01 challenge server
+    tls_alpn_server.add(domain, key, cert_normal, cert_challenge)
+    tls_alpn_server.update()
+    return 'ok'
+
+
+@app.route('/tls-alpn/<string:domain>/certificate-and-key', methods=['PUT'])
+def tls_alpn_challenge_put_pem(domain):
+    log('Adding TLS ALPN challenge for domain {0} (PEM certificate and key)'.format(domain))
+    key, cert_challenge = _get_alpn_key_cert_from_pem_chain(domain, request.data)
+    cert_normal = gen_ss_cert(key, [domain], [])
+    # Start/modify TLS-ALPN-01 challenge server
+    tls_alpn_server.add(domain, key, cert_normal, cert_challenge)
+    tls_alpn_server.update()
+    return 'ok'
+
+
+@app.route('/tls-alpn/<string:domain>', methods=['DELETE'])
+def tls_alpn_challenge_delete(domain):
+    log('Removing TLS ALPN challenge for domain {0}'.format(domain))
+    tls_alpn_server.remove(domain)
     tls_alpn_server.update()
     return 'ok'
 
@@ -159,10 +201,18 @@ def get_http_challenge(filename):
     return challenges[host][filename]
 
 
-@app.route('/root-certificate')
-def get_root_certificate():
+@app.route('/root-certificate-for-acme-endpoint')
+def get_root_certificate_minica():
     with open(os.path.join(PEBBLE_PATH, 'test', 'certs', 'pebble.minica.pem'), 'rt') as f:
         return f.read()
+
+
+@app.route('/root-certificate-for-ca')
+def get_root_certificate_pebble():
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return urllib.request.urlopen("https://localhost:14000/root", context=ctx).read()
 
 
 if __name__ == "__main__":
