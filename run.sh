@@ -9,4 +9,4 @@ export CONTROLLER_PORT=5000
 export PEBBLE_VA_SLEEPTIME=5
 # Start Pebble
 cd /go/src/github.com/letsencrypt/pebble
-/go/bin/pebble -config /go/src/github.com/letsencrypt/pebble/test/config/pebble-config.json
+/go/bin/pebble -config /go/src/github.com/letsencrypt/pebble/test/config/pebble-config.json -strict true
