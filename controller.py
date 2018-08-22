@@ -131,7 +131,7 @@ def _get_alpn_key_cert_from_der_value(domain, data):
     key = crypto.PKey()
     key.generate_key(crypto.TYPE_RSA, 2048)
     # Create self-signed certificates
-    acme_extension = crypto.X509Extension(b"1.3.6.1.5.5.7.1.30.1", critical=True, value=der_value)
+    acme_extension = crypto.X509Extension(b"1.3.6.1.5.5.7.1.31", critical=True, value=der_value)
     cert_challenge = gen_ss_cert(key, [domain], extensions=[acme_extension])
     return key, cert_challenge
 
