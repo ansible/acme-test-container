@@ -1,6 +1,6 @@
 FROM golang:1.10-stretch as builder
 # Install pebble
-ARG PEBBLE_CHECKOUT="bf4f940dd9f4686294de686379a19eaf541ab8d3"
+ARG PEBBLE_CHECKOUT="1f851bf3f6b0c22d2f59c1e8958b79e0ab7ad580"
 ENV GOPATH=/go
 RUN go get -u github.com/letsencrypt/pebble/... && \
     cd /go/src/github.com/letsencrypt/pebble && \
