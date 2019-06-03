@@ -168,7 +168,9 @@ class TLSALPN01Server(socketserver.TCPServer):
         server_name = connection.get_servername()
         self.log_callback("TLS ALPN Challenge server: Serving challenge cert for server name {0}".format(server_name))
         # return self.certs.get(server_name, None)
-        return self.challenge_certs.get(server_name, None)
+        if server_name.endswith(b'.'):
+            server_name = server_name[:-1]
+        return self.challenge_certs.get(server_name)
 
     def _alpn_selection(self, _connection, alpn_protos):
         """Callback to select alpn protocol."""
@@ -198,11 +200,15 @@ class ALPNChallengeServer(object):
         self.log_callback = log_callback
 
     def add(self, domain, key, cert_normal, cert_challenge):
+        if domain.endswith('.'):
+            domain = domain[:-1]
         domain = domain.encode('utf-8')
         self.certs[domain] = (key, cert_normal)
         self.challenge_certs[domain] = (key, cert_challenge)
 
     def remove(self, domain):
+        if domain.endswith('.'):
+            domain = domain[:-1]
         domain = domain.encode('utf-8')
         self.certs.pop(domain)
         self.challenge_certs.pop(domain)
@@ -216,14 +222,16 @@ class ALPNChallengeServer(object):
             self.thread.start()
 
 
-def gen_ss_cert(key, domains, extensions):
+def gen_ss_cert(key, domains, ips, extensions):
     cert = crypto.X509()
     cert.set_serial_number(int(binascii.hexlify(os.urandom(16)), 16))
     cert.set_version(2)
     extensions.append(crypto.X509Extension(b"basicConstraints", True, b"CA:TRUE, pathlen:0"))
-    cert.get_subject().CN = domains[0]
     cert.set_issuer(cert.get_subject())
-    extensions.append(crypto.X509Extension(b"subjectAltName", critical=False, value=b", ".join(b"DNS:" + d.encode() for d in domains)))
+    sans = []
+    sans.extend([b"DNS:" + d.encode() for d in domains])
+    sans.extend([b"IP:" + d.encode() for d in ips])
+    extensions.append(crypto.X509Extension(b"subjectAltName", critical=False, value=b", ".join(sans)))
     cert.add_extensions(extensions)
     cert.gmtime_adj_notBefore(0)
     cert.gmtime_adj_notAfter(24 * 60 * 60)
