@@ -129,10 +129,10 @@ def _get_alpn_key_cert_from_der_value(domain, identifier, data):
     der_value = b"DER:0420" + codecs.encode(base64.standard_b64decode(data), 'hex')
     domains = []
     ips = []
-    if identifier.startswith('DNS:'):
-        domains.add(identifier[4:])
-    elif identifier.startswith('IP:'):
-        ips.add(identifier[3:])
+    if identifier.upper().startswith('DNS:'):
+        domains.append(identifier[4:])
+    elif identifier.upper().startswith('IP:'):
+        ips.append(identifier[3:])
     # Create private key
     key = crypto.PKey()
     key.generate_key(crypto.TYPE_RSA, 2048)
