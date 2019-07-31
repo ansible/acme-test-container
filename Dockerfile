@@ -1,4 +1,4 @@
-FROM golang:1.10-stretch as builder
+FROM golang:1.12-stretch as builder
 # Install pebble
 ARG PEBBLE_CHECKOUT="9b54f0d590c51f1c5380c88027950dc907d093d8"
 ENV GOPATH=/go
