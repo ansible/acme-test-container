@@ -1,6 +1,6 @@
 FROM golang:1.10-stretch as builder
 # Install pebble
-ARG PEBBLE_CHECKOUT="888d88f6b5b99ca8351cd23131df71ee156f6b45"
+ARG PEBBLE_CHECKOUT="9b54f0d590c51f1c5380c88027950dc907d093d8"
 ENV GOPATH=/go
 RUN go get -u github.com/letsencrypt/pebble/... && \
     cd /go/src/github.com/letsencrypt/pebble && \
@@ -15,8 +15,7 @@ RUN pip3 install -r /root/requirements.txt
 COPY --from=builder /go/bin /go/bin
 COPY --from=builder /go/pkg /go/pkg
 COPY --from=builder /go/src/github.com/letsencrypt/pebble/test /go/src/github.com/letsencrypt/pebble/test
-ADD pebble-config.json /go/src/github.com/letsencrypt/pebble/test/config/pebble-config.json
 # Setup controller.py and run.sh
-ADD run.sh controller.py dns_server.py acme_tlsalpn.py LICENSE LICENSE-acme README.md /root/
-EXPOSE 5000 14000
+ADD run.sh controller.py dns_server.py acme_tlsalpn.py create-pebble-config.py LICENSE LICENSE-acme README.md /root/
+EXPOSE 5000 6000 14000
 CMD [ "/bin/sh", "-c", "/root/run.sh" ]
