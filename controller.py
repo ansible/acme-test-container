@@ -226,7 +226,7 @@ def get_root_certificate_pebble(index):
     return urllib.request.urlopen("https://localhost:15000/roots/{0}".format(index), context=ctx).read()
 
 
-@app.route('/intermediate-certificate-for-ca'<int:index>)
+@app.route('/intermediate-certificate-for-ca<int:index>')
 def get_intermediate_certificate_pebble(index):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
