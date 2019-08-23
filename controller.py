@@ -218,12 +218,20 @@ def get_root_certificate_minica():
         return f.read()
 
 
-@app.route('/root-certificate-for-ca')
-def get_root_certificate_pebble():
+@app.route('/root-certificate-for-ca/<int:index>')
+def get_root_certificate_pebble(index):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
-    return urllib.request.urlopen("https://localhost:14000/root", context=ctx).read()
+    return urllib.request.urlopen("https://localhost:15000/roots/{0}".format(index), context=ctx).read()
+
+
+@app.route('/intermediate-certificate-for-ca<int:index>')
+def get_intermediate_certificate_pebble(index):
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return urllib.request.urlopen("https://localhost:15000/intermediates/{0}".format(index), context=ctx).read()
 
 
 if __name__ == "__main__":

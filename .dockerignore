@@ -1,11 +1,11 @@
 *
 !bind.conf
-!pebble-config.json
 !requirements.txt
 !run.sh
 !controller.py
 !dns_server.py
 !acme_tlsalpn.py
+!create-pebble-config.py
 !README.md
 !LICENSE
 !LICENSE-acme
