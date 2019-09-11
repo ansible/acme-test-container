@@ -1,4 +1,4 @@
-FROM golang:1.12-stretch as builder
+FROM golang:1.13-stretch as builder
 # Install pebble
 ARG PEBBLE_REMOTE=
 ARG PEBBLE_CHECKOUT="c65a2f3c2be48868db01363f32d1d99c77281946"
