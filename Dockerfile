@@ -3,7 +3,7 @@ FROM golang:1.13-stretch as builder
 ARG PEBBLE_REMOTE=
 ARG PEBBLE_CHECKOUT="c65a2f3c2be48868db01363f32d1d99c77281946"
 ENV GOPATH=/go
-RUN go get -u github.com/letsencrypt/pebble/... && \
+RUN go get -v -u github.com/letsencrypt/pebble/... && \
     cd /go/src/github.com/letsencrypt/pebble && \
     if [ "${PEBBLE_REMOTE}" != "" ]; then \
       git remote add other ${PEBBLE_REMOTE} && \
