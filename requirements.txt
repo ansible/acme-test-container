@@ -1,4 +1,4 @@
 Flask==1.0.2
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 pyOpenSSL==18.0.0
 dnslib==0.9.7
