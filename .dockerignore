@@ -5,6 +5,7 @@
 !controller.py
 !dns_server.py
 !acme_tlsalpn.py
+!ocsp.py
 !create-pebble-config.py
 !README.md
 !LICENSE

@@ -32,7 +32,7 @@ config = {
     "privateKey": "test/certs/localhost/key.pem",
     "httpPort": 5000,
     "tlsPort": 5001,
-    "ocspResponderURL": "http://{0}:6000".format(own_ip),  # will be added later
+    "ocspResponderURL": "http://{0}:5000/ocsp".format(own_ip),  # will be added later
     "externalAccountBindingRequired": False,
     "externalAccountMACKeys": {
       "kid-1": "zWNDZM6eQGHWpSRTPal5eIUYFTu7EajVIoguysqZ9wG44nMEtx3MUAsUDkMTQ12W",

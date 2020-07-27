@@ -23,6 +23,6 @@ COPY --from=builder /go/bin /go/bin
 COPY --from=builder /go/pkg /go/pkg
 COPY --from=builder /go/src/github.com/letsencrypt/pebble/test /go/src/github.com/letsencrypt/pebble/test
 # Setup controller.py and run.sh
-ADD run.sh controller.py dns_server.py acme_tlsalpn.py create-pebble-config.py LICENSE LICENSE-acme README.md /root/
-EXPOSE 5000 6000 14000
+ADD run.sh controller.py dns_server.py acme_tlsalpn.py ocsp.py create-pebble-config.py LICENSE LICENSE-acme README.md /root/
+EXPOSE 5000 14000
 CMD [ "/bin/sh", "-c", "/root/run.sh" ]
