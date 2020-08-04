@@ -1,15 +1,15 @@
 # Requirements
-Flask==1.1.1
-pyOpenSSL==19.0.0
-dnslib==0.9.10
+Flask==1.1.2
+pyOpenSSL==19.1.0
+dnslib==0.9.14
+cryptography==3.0
 
 # Implicit requirements to make Python part reproducable
-Jinja2==2.10.3
+Jinja2==2.11.2
 MarkupSafe==1.1.1
-Werkzeug==0.16.0
-cffi==1.13.2
-click==7.0
-cryptography==2.8
+Werkzeug==1.0.1
+cffi==1.14.1
+click==7.1.2
 itsdangerous==1.1.0
-pycparser==2.19
-six==1.12.0
+pycparser==2.20
+six==1.15.0

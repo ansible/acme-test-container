@@ -29,13 +29,14 @@ import urllib
 
 from functools import partial
 
-from flask import Flask
-from flask import request
+from flask import Flask, request
 
 from acme_tlsalpn import ALPNChallengeServer, gen_ss_cert
+
 from OpenSSL import crypto
 
 from dns_server import DNSServer
+from ocsp import get_ocsp_response
 
 
 app = Flask(__name__)
@@ -218,20 +219,35 @@ def get_root_certificate_minica():
         return f.read()
 
 
-@app.route('/root-certificate-for-ca/<int:index>')
-def get_root_certificate_pebble(index):
+def _pebble_urlopen(fragment, *args, **kwargs):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
-    return urllib.request.urlopen("https://localhost:15000/roots/{0}".format(index), context=ctx).read()
+    url = "https://localhost:15000{0}".format(fragment)
+    log('(internal call to {0})'.format(url))
+    return urllib.request.urlopen(url, *args, context=ctx, **kwargs)
+
+
+@app.route('/root-certificate-for-ca/<int:index>')
+def get_root_certificate_pebble(index):
+    return _pebble_urlopen("/roots/{0}".format(index)).read()
 
 
 @app.route('/intermediate-certificate-for-ca/<int:index>')
 def get_intermediate_certificate_pebble(index):
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    return urllib.request.urlopen("https://localhost:15000/intermediates/{0}".format(index), context=ctx).read()
+    return _pebble_urlopen("/intermediates/{0}".format(index)).read()
+
+
+@app.route('/ocsp/<string:data>', methods=['GET'])
+def ocsp_get(data):
+    log('Received OCSP GET request')
+    return get_ocsp_response(base64.urlsafe_b64decode(data), _pebble_urlopen, log=log)
+
+
+@app.route('/ocsp', methods=['POST'])
+def ocsp_post():
+    log('Received OCSP POST request')
+    return get_ocsp_response(request.data, _pebble_urlopen, log=log)
 
 
 if __name__ == "__main__":
