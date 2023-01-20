@@ -11,7 +11,7 @@ export CONTROLLER_PORT=5000
 export GOPATH=/go
 /usr/local/bin/python /root/controller.py &
 # Create Pebble config
-/usr/local/bin/python /root/create-pebble-config.py /go/src/github.com/letsencrypt/pebble/test/config/pebble-config.json
+/usr/local/bin/python /root/create-pebble-config.py /pebble-src/test/config/pebble-config.json
 # Start Pebble
-cd /go/src/github.com/letsencrypt/pebble
-/go/bin/pebble -config /go/src/github.com/letsencrypt/pebble/test/config/pebble-config.json -strict true
+cd /pebble-src
+/go/bin/pebble -config /pebble-src/test/config/pebble-config.json -strict true
