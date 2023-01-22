@@ -1,10 +1,10 @@
-FROM golang:1.13-stretch as builder
+FROM golang:1.19-bullseye as builder
 # Install pebble
+ENV CGO_ENABLED=0
 ARG PEBBLE_REMOTE=
-ARG PEBBLE_CHECKOUT="05f79ba495ab6a27cbbc32e20b44afac52eb9914"
-ENV GOPATH=/go
-RUN go get -v -u github.com/letsencrypt/pebble/... && \
-    cd /go/src/github.com/letsencrypt/pebble && \
+ARG PEBBLE_CHECKOUT="d5fa73840ef4a2efa7870648ae174627ef001e9c"
+WORKDIR /pebble-src
+RUN git clone https://github.com/letsencrypt/pebble.git /pebble-src && \
     if [ "${PEBBLE_REMOTE}" != "" ]; then \
       git remote add other ${PEBBLE_REMOTE} && \
       git fetch other && \
@@ -12,16 +12,15 @@ RUN go get -v -u github.com/letsencrypt/pebble/... && \
     else \
       git checkout ${PEBBLE_CHECKOUT}; \
     fi && \
-    go install ./...
+    go build -o /go/bin/pebble ./cmd/pebble
 
-FROM python:3.6-slim-stretch
+FROM python:3.11-slim-bullseye
 # Install software
 ADD requirements.txt /root/
 RUN pip3 install -r /root/requirements.txt
 # Install pebble
-COPY --from=builder /go/bin /go/bin
-COPY --from=builder /go/pkg /go/pkg
-COPY --from=builder /go/src/github.com/letsencrypt/pebble/test /go/src/github.com/letsencrypt/pebble/test
+COPY --from=builder /go/bin/pebble /go/bin/pebble
+COPY --from=builder /pebble-src/test /pebble-src/test
 # Setup controller.py and run.sh
 ADD run.sh controller.py dns_server.py acme_tlsalpn.py ocsp.py create-pebble-config.py LICENSE LICENSE-acme README.md /root/
 EXPOSE 5000 14000
