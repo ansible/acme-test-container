@@ -100,7 +100,14 @@ class SSLSocket(object):
 
         def shutdown(self, *unused_args):
             # OpenSSL.SSL.Connection.shutdown doesn't accept any args
-            return self._wrapped.shutdown()
+            try:
+                return self._wrapped.shutdown()
+            except SSL.Error as error:
+                # We wrap the error so we raise the same error type as sockets
+                # in the standard library. This is useful when this object is
+                # used by code which expects a standard socket such as
+                # socketserver in the standard library.
+                raise socket.error(error)
 
     def accept(self):  # pylint: disable=missing-docstring
         sock, addr = self.sock.accept()
