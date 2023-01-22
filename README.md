@@ -1,5 +1,7 @@
 # acme-test-container
 
+[![Build Status](https://dev.azure.com/ansible/acme-test-container/_apis/build/status/CI?branchName=main)](https://dev.azure.com/ansible/acme-test-container/_build?definitionId=11)
+
 A container for integration testing ACME protocol modules.
 
 Uses [Pebble](https://github.com/letsencrypt/Pebble).
