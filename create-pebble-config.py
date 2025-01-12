@@ -50,10 +50,14 @@ config = {
     "domainBlocklist": ["blocked-domain.example"],
     "profiles": {
       "default": {
+        "description": "Original Pebble settings",
+        "validityPeriod": 157766400,
+      },
+      "90days": {
         "description": "The profile you know and love",
         "validityPeriod": 7776000,
       },
-      "shortlived": {
+      "6days": {
         "description": "A short-lived cert profile, without actual enforcement",
         "validityPeriod": 518400,
       },
