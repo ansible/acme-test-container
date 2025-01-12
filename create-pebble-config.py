@@ -32,6 +32,10 @@ config = {
     "privateKey": "test/certs/localhost/key.pem",
     "httpPort": 5000,
     "tlsPort": 5001,
+    "retryAfter": {
+        "authz": 1,
+        "order": 1,
+    },
     "ocspResponderURL": "http://{0}:5000/ocsp".format(own_ip),  # will be added later
     "externalAccountBindingRequired": False,
     "externalAccountMACKeys": {
@@ -40,9 +44,25 @@ config = {
       "kid-3": "zWNDZM6eQGHWpSRTPal5eIUYFTu7EajVIoguysqZ9wG44nMEtx3MUAsUDkMTQ12W",
       "kid-4": "b10lLJs8l1GPIzsLP0s6pMt8O0XVGnfTaCeROxQM0BIt2XrJMDHJZBM5NuQmQJQH",
       "kid-5": "zWNDZM6eQGHWpSRTPal5eIUYFTu7EajVIoguysqZ9wG44nMEtx3MUAsUDkMTQ12W",
-      "kid-6": "b10lLJs8l1GPIzsLP0s6pMt8O0XVGnfTaCeROxQM0BIt2XrJMDHJZBM5NuQmQJQH"
-    }
-  }
+      "kid-6": "b10lLJs8l1GPIzsLP0s6pMt8O0XVGnfTaCeROxQM0BIt2XrJMDHJZBM5NuQmQJQH",
+      "kid-7": "HjudV5qnbreN-n9WyFSH-t4HXuEx_XFen45zuxY-G1h6fr74V3cUM_dVlwQZBWmc",
+    },
+    "domainBlocklist": ["blocked-domain.example"],
+    "profiles": {
+      "default": {
+        "description": "Original Pebble settings",
+        "validityPeriod": 157766400,
+      },
+      "90days": {
+        "description": "The profile you know and love",
+        "validityPeriod": 7776000,
+      },
+      "6days": {
+        "description": "A short-lived cert profile, without actual enforcement",
+        "validityPeriod": 518400,
+      },
+    },
+  },
 }
 
 with open(sys.argv[1], "wt") as f:

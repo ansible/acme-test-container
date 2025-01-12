@@ -1,8 +1,8 @@
-FROM golang:1.19-bullseye as builder
+FROM golang:1.23-bookworm AS builder
 # Install pebble
 ENV CGO_ENABLED=0
 ARG PEBBLE_REMOTE=
-ARG PEBBLE_CHECKOUT="d5fa73840ef4a2efa7870648ae174627ef001e9c"
+ARG PEBBLE_CHECKOUT="ddbc6bef1a71bf09e6ca5a7ed4d20ae3882c2bb7"
 WORKDIR /pebble-src
 RUN git clone https://github.com/letsencrypt/pebble.git /pebble-src && \
     if [ "${PEBBLE_REMOTE}" != "" ]; then \
@@ -14,7 +14,7 @@ RUN git clone https://github.com/letsencrypt/pebble.git /pebble-src && \
     fi && \
     go build -o /go/bin/pebble ./cmd/pebble
 
-FROM python:3.11-slim-bullseye
+FROM python:3.13-slim-bookworm
 # Install software
 ADD requirements.txt /root/
 RUN pip3 install -r /root/requirements.txt
