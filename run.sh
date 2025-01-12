@@ -14,4 +14,4 @@ export GOPATH=/go
 /usr/local/bin/python /root/create-pebble-config.py /pebble-src/test/config/pebble-config.json
 # Start Pebble
 cd /pebble-src
-/go/bin/pebble -config /pebble-src/test/config/pebble-config.json -strict true
+/go/bin/pebble -config /pebble-src/test/config/pebble-config.json -strict
