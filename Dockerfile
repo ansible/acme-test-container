@@ -1,4 +1,4 @@
-FROM golang:1.23-bookworm AS builder
+FROM public.ecr.aws/docker/library/golang:1.23-bookworm AS builder
 # Install pebble
 ENV CGO_ENABLED=0
 ARG PEBBLE_REMOTE=
@@ -14,7 +14,7 @@ RUN git clone https://github.com/letsencrypt/pebble.git /pebble-src && \
     fi && \
     go build -o /go/bin/pebble ./cmd/pebble
 
-FROM python:3.13-slim-bookworm
+FROM public.ecr.aws/docker/library/python:3.13-slim-bookworm
 # Install software
 ADD requirements.txt /root/
 RUN pip3 install -r /root/requirements.txt
