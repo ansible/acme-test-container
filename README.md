@@ -10,12 +10,12 @@ Uses [Pebble](https://github.com/letsencrypt/Pebble).
 
 Building the image locally
 ```
-docker image build -t local/ansible/acme-test-container:latest .
+podman image build -t local/ansible/acme-test-container:latest .
 ```
 
 Building the image locally with a different version of Pebble checked out
 ```
-docker image build --build-arg PEBBLE_CHECKOUT=<hash|branch|tag> -t local/ansible/acme-test-container:<hash|branch|tag> .
+podman image build --build-arg PEBBLE_CHECKOUT=<hash|branch|tag> -t local/ansible/acme-test-container:<hash|branch|tag> .
 ```
 
 ## Release process
@@ -32,5 +32,5 @@ Some of the code (collected in [acme_tlsalpn.py](acme_tlsalpn.py)) has been take
 and is licensed under the Apache License 2.0, which can be found in [LICENSE-acme](LICENSE-acme).
 This code is copyright 2015 Electronic Frontier Foundation and others.
 
-The controller, Dockerfile and all other files are licensed under the GPL v3 (or later).
+The controller, Containerfile and all other files are licensed under the GPL v3 (or later).
 You can find the license in [LICENSE](LICENSE).
