@@ -48,6 +48,7 @@ config = {
       "kid-6": "b10lLJs8l1GPIzsLP0s6pMt8O0XVGnfTaCeROxQM0BIt2XrJMDHJZBM5NuQmQJQH",
       "kid-7": "HjudV5qnbreN-n9WyFSH-t4HXuEx_XFen45zuxY-G1h6fr74V3cUM_dVlwQZBWmc",
     },
+    "caaIdentities": ["pebble.letsencrypt.org", "ca.example.com"],
     "domainBlocklist": ["blocked-domain.example"],
     "profiles": {
       "default": {
