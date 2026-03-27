@@ -2,7 +2,7 @@ FROM public.ecr.aws/docker/library/golang:1.26-bookworm AS builder
 # Install pebble
 ENV CGO_ENABLED=0
 ARG PEBBLE_REMOTE=
-ARG PEBBLE_CHECKOUT="ddbc6bef1a71bf09e6ca5a7ed4d20ae3882c2bb7"
+ARG PEBBLE_CHECKOUT="28b1645b2dbb74bd3838e477d1476dde00980cc4"
 WORKDIR /pebble-src
 RUN git clone https://github.com/letsencrypt/pebble.git /pebble-src && \
     if [ "${PEBBLE_REMOTE}" != "" ]; then \
