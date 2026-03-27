@@ -27,6 +27,7 @@ import re
 import ssl
 import sys
 import urllib
+import urllib.request
 
 from functools import partial
 
