@@ -17,7 +17,7 @@ RUN git clone https://github.com/letsencrypt/pebble.git /pebble-src && \
 FROM public.ecr.aws/docker/library/python:3.14-slim-bookworm
 # Install software
 ADD requirements.txt /root/
-RUN pip3 install -r /root/requirements.txt
+RUN pip3 install --no-cache-dir -r /root/requirements.txt
 # Install pebble
 COPY --from=builder /go/bin/pebble /go/bin/pebble
 COPY --from=builder /pebble-src/test /pebble-src/test
