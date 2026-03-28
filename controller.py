@@ -44,7 +44,7 @@ from ocsp import get_ocsp_response
 app = Flask(__name__)
 app.config['LOGGER_HANDLER_POLICY'] = 'always'
 
-PEBBLE_PATH = os.path.join(os.path.abspath(os.environ.get('GOPATH', '.')), 'src', 'github.com', 'letsencrypt', 'pebble')
+PEBBLE_PATH = "/pebble-src"
 
 
 challenges = {}
